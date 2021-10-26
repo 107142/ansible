@@ -1,0 +1,64 @@
+---
+
+- name: "Setup Icinga monitoring"
+  hosts: "localhost"
+  gather_facts: false
+  connection: local
+  vars:
+    icinga_hostname: "icinga.api"
+  vars_files:
+    - vars/vault.yml
+    - vars/groups.yml
+    - vars/users.yml
+    - vars/hosts.yml
+    - vars/deps.yml
+  tasks:
+    - include_tasks: "{{ playbook_dir }}/icinga/icinga-groups.yml"
+      args:
+        apply:
+          tags:
+            - groups
+      tags:
+        - groups
+
+    - include_tasks: "{{ playbook_dir }}/icinga/icinga-users.yml"
+      args:
+        apply:
+          tags:
+            - users
+      tags:
+        - users
+
+    - include_tasks: "{{ playbook_dir }}/icinga/icinga-hosts.yml"
+      args:
+        apply:
+          tags:
+            - hosts
+      tags:
+        - hosts
+
+    - include_tasks: "{{ playbook_dir }}/icinga/icinga-services.yml"
+      args:
+        apply:
+          tags:
+            - services
+      tags:
+        - services
+
+    - include_tasks: "{{ playbook_dir }}/icinga/icinga-notifications.yml"
+      args:
+        apply:
+          tags:
+            - notifications
+      tags:
+        - notifications
+
+    - include_tasks: "{{ playbook_dir }}/icinga/icinga-deps.yml"
+      args:
+        apply:
+          tags:
+            - deps
+      tags:
+        - deps
+
+...

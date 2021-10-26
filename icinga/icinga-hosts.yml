@@ -1,0 +1,55 @@
+---
+
+- name: Icinga hosts
+  block:
+
+    - name: Set neccesary values - URI
+      set_fact:
+        icinga_base_uri: "hosts"
+
+    - name: Set neccesary values - name
+      set_fact:
+        icinga_base_name: "Host"
+
+    - name: Set neccesary values - register
+      set_fact:
+        icinga_base_register: "host"
+
+    - name: "Reset icinga_base_items"
+      set_fact:
+        icinga_base_items: []
+
+    - name: Generate body
+      set_fact:
+        icinga_base_items: "{{ icinga_base_items + [ icinga_host_body ] }}"
+      vars:
+        icinga_host_body:
+          name: "{{ item.name }}"
+          state: "{{ item.state |default('present') }}"
+          templates: "{{ item.templates |default(None) }}"
+          attrs: "{{ icinga_default_host_attrs |default({}) |combine(item.attrs|default({})) }}"
+          cascade: "?cascade={{ item.cascade |default(0) }}"
+      loop: "{{ icinga_hosts }}"
+
+    - include_tasks: "{{ playbook_dir }}/icinga/icinga-base.yml"
+  when:
+    - icinga_hosts is defined
+
+  always:
+    - name: Reset neccesary values - URI
+      set_fact:
+        icinga_base_uri: ""
+
+    - name: Reset neccesary values - name
+      set_fact:
+        icinga_base_name: ""
+
+    - name: Reset neccesary values - register
+      set_fact:
+        icinga_base_register: ""
+
+    - name: "Reset neccesary values - base"
+      set_fact:
+        icinga_base_items: []
+
+...

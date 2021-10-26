@@ -1,0 +1,126 @@
+---
+
+- name: Icinga services
+  block:
+
+    - name: Set neccesary values - URI
+      set_fact:
+        icinga_base_uri: "notifications"
+
+    - name: Set neccesary values - name
+      set_fact:
+        icinga_base_name: "Notifications"
+
+    - name: Set neccesary values - register
+      set_fact:
+        icinga_base_register: "notifications"
+
+    - name: Set neccesary values - names
+      set_fact:
+        icinga_service_names: []
+
+    - name: Set neccesary values - default items
+      set_fact:
+        icinga_notify_items: []
+
+    - name: Empty value
+      set_fact:
+        icinga_service_items: []
+
+    - name: Gather services
+      set_fact:
+        icinga_service_items: "{{ icinga_service_items + [ service_items ] }}"
+      vars:
+        services: "{% if item.services == 'defaults' %}{{ icinga_default_services }}{% else %}{{ item.services }}{% endif %}"
+        service_items:
+          name: "{{ item.name }}"
+          services: "{{ services }}"
+      loop: "{{ icinga_hosts }}"
+      when:
+        - item.services is defined
+
+    - name: Gather combined services
+      set_fact:
+        icinga_service_items: "{{ icinga_service_items + [ service_items ] }}"
+      vars:
+        services: "{{ icinga_default_services + item.services_combined }}"
+        service_items:
+          name: "{{ item.name }}"
+          services: "{{ services }}"
+      loop: "{{ icinga_hosts }}"
+      when:
+        - item.services_combined is defined
+
+    - name: Gather host notifications
+      set_fact:
+        icinga_notify_items: "{{ icinga_notify_items + [ notify_item ] }}"
+      vars:
+        notify_item:
+          host_name: "{{ item.name }}"
+          notifications: >-
+            {% if item.notifications == 'defaults' %}{{ icinga_default_host_notifs }}
+            {% elif item.notifications == 'defaults1' %}{{ icinga_default_host_notifs1 }}
+            {% elif item.notifications == 'defaults2' %}{{ icinga_default_host_notifs2 }}
+            {% elif item.notifications == 'defaults3' %}{{ icinga_default_host_notifs3 }}
+            {% elif item.notifications == 'defaults4' %}{{ icinga_default_host_notifs4 }}
+            {% else %}{{ item.notifications }}
+            {% endif %}
+      loop: "{{ icinga_hosts }}"
+      when:
+        - item.notifications is defined
+
+    - name: Gather combined host notifications
+      set_fact:
+        icinga_notify_items: "{{ icinga_notify_items + [ notify_item ] }}"
+      vars:
+        notify_item:
+          host_name: "{{ item.name }}"
+          notifications: "{{ icinga_default_host_notifs + item.notifications_combined }}"
+      loop: "{{ icinga_hosts }}"
+      when:
+        - item.notifications_combined is defined
+
+    - name: Gater service notifications
+      set_fact:
+        icinga_notify_items: "{{ icinga_notify_items + [ notify_item ] }}"
+      vars:
+        notify_item:
+          host_name: "{{ item.0.name }}"
+          service_name: "{{ item.1.name }}"
+          notifications: >-
+            {% if item.1.notifications == 'defaults' %}{{ icinga_default_service_notifs }}
+            {% elif item.1.notifications == 'defaults1' %}{{ icinga_default_service_notifs1 }}
+            {% elif item.1.notifications == 'defaults2' %}{{ icinga_default_service_notifs2 }}
+            {% elif item.1.notifications == 'defaults3' %}{{ icinga_default_service_notifs3 }}
+            {% elif item.1.notifications == 'defaults4' %}{{ icinga_default_service_notifs4 }}
+            {% else %}{{ item.1.notifications }}
+            {% endif %}
+      loop: "{{ q('subelements', icinga_service_items, 'services', {'skip_missing': True}) }}"
+      when:
+        - item.1.notifications is defined
+        - item.1.notifications != None
+
+    - name: Empty icinga base items
+      set_fact:
+        icinga_base_items: []
+
+    - name: Generate object names
+      set_fact:
+        icinga_base_items: "{{ icinga_base_items |default([]) + [ notify_item ] }}"
+      vars:
+        notify_name: "{{ item.0.host_name }}{% if item.0.service_name is defined %}!{{ item.0.service_name }}{% endif %}"
+        notify_attrs:
+          host_name: "{{ item.0.host_name }}"
+          service_name: "{{ item.0.service_name |default(None) }}"
+        notify_item:
+          name: "{{ notify_name }}!{{ item.1.name }}"
+          templates: "{{ item.1.templates |default(None) }}"
+          attrs: "{{ item.1.attrs |combine(notify_attrs) }}"
+          state:  "{{ item.1.state |default('present') }}"
+      loop: "{{ q('subelements', icinga_notify_items, 'notifications', {'skip_missing': True}) }}"
+
+    - include_tasks: "{{ playbook_dir }}/icinga/icinga-base.yml"
+      when:
+        - item.notifications is defined
+
+...

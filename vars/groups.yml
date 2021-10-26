@@ -1,0 +1,35 @@
+---
+
+#icinga_usergroups:
+#  - name:   "..."
+#    state:  "present"
+#    attrs:
+#      display_name: "..."
+#
+#  - name:   "..."
+#    state: "present"
+#    attrs:
+#      display_name: "..."
+#
+#icinga_hostgroups:
+#  - name: "..."
+#    state: "present"
+#    cascade: "1"
+#    attrs:
+#      display_name: "..."
+#
+#  - name: "prefix_jmeno"
+#    state: "present"
+#    attrs:
+#      display_name: "..."
+#
+#icinga_servicegroups:
+#  - name: "..."
+#    state: "present"
+#    attrs:
+#      display_name: "..."
+
+#icinga_hostgroups:
+
+
+...

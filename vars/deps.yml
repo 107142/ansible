@@ -1,0 +1,19 @@
+---
+
+#icinga_deps:
+#  - attrs:
+#      child_host_name: "..."
+#      parent_host_name: "..."
+#    state: "present"
+#
+#  - attrs:
+#      child_host_name: "..."
+#      child_service_name: "..."
+#      parent_host_name: "..."
+#      parent_service_name: "..."
+#    state: "present"
+
+#icinga_deps:
+
+
+...

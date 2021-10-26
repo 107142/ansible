@@ -1,0 +1,69 @@
+---
+
+- name: Icinga services
+  block:
+
+    - name: Set neccesary values - URI
+      set_fact:
+        icinga_base_uri: "services"
+
+    - name: Set neccesary values - name
+      set_fact:
+        icinga_base_name: "Services"
+
+    - name: Set neccesary values - register
+      set_fact:
+        icinga_base_register: "services"
+
+    - name: Set neccesary values - names
+      set_fact:
+        icinga_service_names: []
+
+    - name: Set neccesary values - default items
+      set_fact:
+        icinga_base_items: []
+
+    - name: Empty value
+      set_fact:
+        icinga_service_items: []
+
+    - name: Gather services
+      set_fact:
+        icinga_service_items: "{{ icinga_service_items + [ service_items ] }}"
+      vars:
+        service_items:
+          name: "{{ item.name }}"
+          services: "{% if item.services == 'defaults' %}{{ icinga_default_services }}{% else %}{{ item.services }}{% endif %}"
+      loop: "{{ icinga_hosts }}"
+      when:
+        - item.services is defined
+
+    - name: Gather combined services
+      set_fact:
+        icinga_service_items: "{{ icinga_service_items + [ service_items ] }}"
+      vars:
+        service_items:
+          name: "{{ item.name }}"
+          services: "{{ icinga_default_services + item.services_combined }}"
+      loop: "{{ icinga_hosts }}"
+      when:
+        - item.services_combined is defined
+
+    - name: Generate object names
+      set_fact:
+        icinga_base_items: "{{ icinga_base_items + [ service_item ] }}"
+      vars:
+        service_name: "{{ item.0.name }}!{{ item.1.name }}"
+        service_item:
+          name: "{{ service_name }}"
+          cascade: "?cascade={{ item.1.cascade |default(0) }}"
+          templates: "{{ item.1.templates |default(None) }}"
+          attrs: "{{ item.1.attrs }}"
+          state: "{{ item.1.state |default('present') }}"
+      loop: "{{ q('subelements', icinga_service_items, 'services', {'skip_missing': True}) }}"
+
+    - include_tasks: "{{ playbook_dir }}/icinga/icinga-base.yml"
+      when:
+        - ( item.services is defined ) or ( item.services_combined is defined )
+
+...

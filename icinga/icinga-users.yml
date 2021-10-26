@@ -1,0 +1,27 @@
+---
+
+- name: Icinga users
+  block:
+
+    - name: Set neccesary values - URI
+      set_fact:
+        icinga_base_uri: "users"
+
+    - name: Set neccesary values - name
+      set_fact:
+        icinga_base_name: "Users"
+
+    - name: Set neccesary values - register
+      set_fact:
+        icinga_base_register: "users"
+
+    - name: Set neccesary values - items
+      set_fact:
+        icinga_base_items: "{{ icinga_users }}"
+
+    - include_tasks: "{{ playbook_dir }}/icinga/icinga-base.yml"
+
+  when:
+    - icinga_users is defined
+
+...

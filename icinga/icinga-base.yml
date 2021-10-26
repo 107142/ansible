@@ -1,0 +1,94 @@
+---
+
+- name: Reset REST data
+  set_fact:
+    icinga_base_restdata: {}
+
+- name: GET {{ icinga_base_name }} from Icinga
+  uri:
+    url:      "https://{{ icinga_hostname }}:5665/v1/objects/{{ icinga_base_uri }}/{{ item.name }}"
+    user:     "{{ icinga_apiuser }}"
+    password: "{{ icinga_apipwd }}"
+    method:   GET
+    force: yes
+    force_basic_auth: yes
+    return_content: yes
+    headers:
+      Accept: "application/json"
+      Content-Type: "application/json; charset=utf-8"
+  register: icinga_base_restdata
+  loop: "{{ icinga_base_items }}"
+  ignore_errors: yes
+  delegate_to: localhost
+
+- name: "Execution block for {{ icinga_base_name }}"
+  block:
+
+    - name: Test result for {{ icinga_base_name }}
+      fail:
+        msg: "Getting Dependencies {{ item.item.name }} from iginga failed: {{ item.msg }}"
+      when:
+        - "'Failed' in item.msg"
+      loop: "{{ icinga_base_restdata.results }}"
+
+    - name: DELETE {{ icinga_base_name }}
+      uri:
+        url:      "https://{{ icinga_hostname }}:5665/v1/objects/{{ icinga_base_uri }}/{{ item.item.name }}{{ item.item.cascade |default(None) }}"
+        user:     "{{ icinga_apiuser }}"
+        password: "{{ icinga_apipwd }}"
+        method:   DELETE
+        force_basic_auth: yes
+        return_content: yes
+        headers:
+          Accept: "application/json"
+          Content-Type: "application/json; charset=utf-8"
+        body: '{ "attrs": {{ item.item.attrs | to_json }} }'
+        body_format: "json"
+      loop: "{{ icinga_base_restdata.results }}"
+      when:
+        - item["item"].state in ['absent', 'recreate']
+        - item["status"] == 200
+
+    - name: CREATE {{ icinga_base_name }}
+      uri:
+        url:      "https://{{ icinga_hostname }}:5665/v1/objects/{{ icinga_base_uri }}/{{ item.item.name }}"
+        user:     "{{ icinga_apiuser }}"
+        password: "{{ icinga_apipwd }}"
+        method:   PUT
+        force_basic_auth: yes
+        return_content: yes
+        headers:
+          Accept: "application/json"
+          Content-Type: "application/json; charset=utf-8"
+        body: '{ "attrs": {{ item.item.attrs | to_json }} }'
+        body_format: "json"
+      loop: "{{ icinga_base_restdata.results }}"
+      when:
+        - (item.item.state == 'present' and item.status == 404) or (item.item.state == 'recreate' and item.status == 200)
+
+    - name: UPDATE {{ icinga_base_name }}
+      uri:
+        url:      "https://{{ icinga_hostname }}:5665/v1/objects/{{ icinga_base_uri }}/{{ item.item.name }}"
+        user:     "{{ icinga_apiuser }}"
+        password: "{{ icinga_apipwd }}"
+        method:   POST
+        force_basic_auth: yes
+        return_content: yes
+        headers:
+          Accept: "application/json"
+          Content-Type: "application/json; charset=utf-8"
+        body: '{ "attrs": {{ item.item.attrs | to_json }} }'
+        body_format: "json"
+      loop: "{{ icinga_base_restdata.results }}"
+      when:
+        - item.item.state == 'present'
+        - item.status == 200
+
+  always:
+    - name: Reset REST data
+      set_fact:
+        icinga_base_restdata: {}
+
+  delegate_to: localhost
+
+...

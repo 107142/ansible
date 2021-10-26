@@ -1,0 +1,23 @@
+---
+
+#icinga_users:
+#  - name: "user@domain.cz"
+#    state: "present"
+#    attrs:
+#      display_name: "John Smith"
+#      email: "john@smith.cz"
+#      pager: "+420123123123"
+#      groups:
+#        - "sysadmins"
+#      vars:
+#        additional_notes: "more_info"
+#
+#  - name: "..."
+#    state: "absent"
+#    attrs:
+#      ...
+
+#icinga_users:
+
+
+...

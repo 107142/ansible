@@ -1,0 +1,49 @@
+---
+
+- name: Icinga dependencies
+  block:
+    - name: Attrs are requierd in this case...
+      fail:
+        msg: "Attributes are requiered."
+      loop: "{{ icinga_deps }}"
+      when:
+        - item.attrs is not defined
+
+    - name: Set neccesary values - URI
+      set_fact:
+        icinga_base_uri: "dependencies"
+
+    - name: Set neccesary values - name
+      set_fact:
+        icinga_base_name: "Dependencies"
+
+    - name: Set neccesary values - register
+      set_fact:
+        icinga_base_register: "deps"
+
+    - name: Set neccesary values - items
+      set_fact:
+        icinga_base_items: []
+
+    - name: Set neccesary values - names
+      set_fact:
+        icinga_service_deps_names: []
+
+    - name: Generate object names
+      set_fact:
+        icinga_base_items: "{{ icinga_base_items + [ item |combine(service_dep_name) ] }}"
+      vars:
+        service_dep_name: "{ 'name': '{{ item.attrs.child_host_name }}{% if item.attrs.child_service_name is defined %}\
+                          !{{ item.attrs.child_service_name }}{% endif %}\
+                          {% if item.attrs.child_service_name is not defined and item.attrs.parent_service_name is not defined %}\
+                          !{{ item.attrs.parent_host_name }}{% endif %}\
+                          {% if item.attrs.parent_service_name is defined %}\
+                          !{{ item.attrs.parent_service_name }}{% endif %}' }"
+      loop: "{{ icinga_deps }}"
+
+    - include_tasks: "{{ playbook_dir }}/icinga/icinga-base.yml"
+
+  when:
+    - icinga_deps is defined
+
+...

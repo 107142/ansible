@@ -1,0 +1,104 @@
+---
+
+- name: Configure UserGroups in Icinga.
+  block:
+
+    - name: Set neccesary values - URI
+      set_fact:
+        icinga_base_uri: "usergroups"
+
+    - name: Set neccesary values - name
+      set_fact:
+        icinga_base_name: "User Groups"
+
+    - name: Set neccesary values - register
+      set_fact:
+        icinga_base_register: "user_groups"
+
+    - name: Set neccesary values - items
+      set_fact:
+        icinga_base_items: "{{ icinga_usergroups }}"
+
+    - include_tasks: "{{ playbook_dir }}/icinga/icinga-base.yml"
+
+  when:
+    - icinga_usergroups is defined
+
+
+- name: Configure HostGroups in Icinga.
+  block:
+
+    - name: Set neccesary values - URI
+      set_fact:
+        icinga_base_uri: "hostgroups"
+
+    - name: Set neccesary values - name
+      set_fact:
+        icinga_base_name: "Host Groups"
+
+    - name: Set neccesary values - register
+      set_fact:
+        icinga_base_register: "host_groups"
+
+    - name: "Reset icinga_base_items"
+      set_fact:
+        icinga_base_items: []
+
+    - name: Set neccesary values - items
+      set_fact:
+        icinga_base_items: "{{ icinga_base_items + [ icinga_hostgroups_body ] }}"
+      vars:
+        icinga_hostgroups_body:
+          name: "{{ item.name }}"
+          state: "{{ item.state |default('present') }}"
+          attrs: "{{ item.attrs |default({}) }}"
+          cascade: "?cascade={{ item.cascade |default(0) }}"
+      loop: "{{ icinga_hostgroups }}"
+
+    - include_tasks: "{{ playbook_dir }}/icinga/icinga-base.yml"
+
+  when:
+    - icinga_hostgroups is defined
+
+  always:
+    - name: Reset neccesary values - uri
+      set_fact:
+        icinga_base_uri: ""
+
+    - name: Reset neccesary values - name
+      set_fact:
+        icinga_base_name: ""
+
+    - name: Reset neccesary values - register
+      set_fact:
+        icinga_base_register: ""
+
+    - name: "Reset neccesary values - base"
+      set_fact:
+        icinga_base_items: []
+
+- name: Configure ServiceGroups in Icinga.
+  block:
+
+    - name: Set neccesary values - uri
+      set_fact:
+        icinga_base_uri: "servicegroups"
+
+    - name: Set neccesary values - name
+      set_fact:
+        icinga_base_name: "Service Groups"
+
+    - name: Set neccesary values - register
+      set_fact:
+        icinga_base_register: "service_groups"
+
+    - name: Set neccesary values - items
+      set_fact:
+        icinga_base_items: "{{ icinga_servicegroups }}"
+
+    - include_tasks: "{{ playbook_dir }}/icinga/icinga-base.yml"
+
+  when:
+    - icinga_servicegroups is defined
+
+...
