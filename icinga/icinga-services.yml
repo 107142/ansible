@@ -61,9 +61,11 @@
           attrs: "{{ item.1.attrs }}"
           state: "{{ item.1.state |default('present') }}"
       loop: "{{ q('subelements', icinga_service_items, 'services', {'skip_missing': True}) }}"
+      when:
+        - icinga_service_items | length > 0
 
     - include_tasks: "{{ playbook_dir }}/icinga/icinga-base.yml"
       when:
-        - ( item.services is defined ) or ( item.services_combined is defined )
+        - icinga_service_items | length > 0
 
 ...

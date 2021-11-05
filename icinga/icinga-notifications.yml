@@ -118,9 +118,11 @@
           attrs: "{{ item.1.attrs |combine(notify_attrs) }}"
           state:  "{{ item.1.state |default('present') }}"
       loop: "{{ q('subelements', icinga_notify_items, 'notifications', {'skip_missing': True}) }}"
+      when:
+        - icinga_notify_items | length > 0
 
     - include_tasks: "{{ playbook_dir }}/icinga/icinga-base.yml"
       when:
-        - item.notifications is defined
+        - icinga_notify_items | length > 0
 
 ...
