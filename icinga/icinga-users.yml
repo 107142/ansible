@@ -19,7 +19,7 @@
       set_fact:
         icinga_base_items: "{{ icinga_users }}"
 
-    - include_tasks: "{{ playbook_dir }}/icinga/icinga-base.yml"
+    - include_tasks: "icinga-base.yml"
 
   when:
     - icinga_users is defined

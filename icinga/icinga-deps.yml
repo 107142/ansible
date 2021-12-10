@@ -41,7 +41,7 @@
                           !{{ item.attrs.parent_service_name }}{% endif %}' }"
       loop: "{{ icinga_deps }}"
 
-    - include_tasks: "{{ playbook_dir }}/icinga/icinga-base.yml"
+    - include_tasks: "icinga-base.yml"
 
   when:
     - icinga_deps is defined

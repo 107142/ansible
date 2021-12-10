@@ -19,7 +19,7 @@
       set_fact:
         icinga_base_items: "{{ icinga_usergroups }}"
 
-    - include_tasks: "{{ playbook_dir }}/icinga/icinga-base.yml"
+    - include_tasks: "icinga-base.yml"
 
   when:
     - icinga_usergroups is defined
@@ -55,7 +55,7 @@
           cascade: "?cascade={{ item.cascade |default(0) }}"
       loop: "{{ icinga_hostgroups }}"
 
-    - include_tasks: "{{ playbook_dir }}/icinga/icinga-base.yml"
+    - include_tasks: "icinga-base.yml"
 
   when:
     - icinga_hostgroups is defined
@@ -96,7 +96,7 @@
       set_fact:
         icinga_base_items: "{{ icinga_servicegroups }}"
 
-    - include_tasks: "{{ playbook_dir }}/icinga/icinga-base.yml"
+    - include_tasks: "icinga-base.yml"
 
   when:
     - icinga_servicegroups is defined

@@ -31,7 +31,7 @@
           cascade: "?cascade={{ item.cascade |default(0) }}"
       loop: "{{ icinga_hosts }}"
 
-    - include_tasks: "{{ playbook_dir }}/icinga/icinga-base.yml"
+    - include_tasks: "icinga-base.yml"
   when:
     - icinga_hosts is defined
 

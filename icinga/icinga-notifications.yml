@@ -121,7 +121,7 @@
       when:
         - icinga_notify_items | length > 0
 
-    - include_tasks: "{{ playbook_dir }}/icinga/icinga-base.yml"
+    - include_tasks: "icinga-base.yml"
       when:
         - icinga_notify_items | length > 0
 
